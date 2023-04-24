@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap');
+
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #154D59;
+    --secondary: #101938;
+    --accent: #F27649;
+    --green: #2E8C7B;
+    --cream: #F2E6D8;
+
+    --hero-font-size: clamp(2.5rem, 10vw, 7.5rem);
+
+    --b-radius: 1em;
+
+    font-family: 'Lora', serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    color-scheme: light dark;
+    background-color: var(--primary);
+    scroll-behavior: auto;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    margin: 0;
+}
+
+.hero {
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 1em;
+    flex: 1;
+}
+
+.heading-container {
+    display: flex;
+    flex-direction: column;
+    max-height: 38em;
+    gap: 2em;
+    height: 100%;
+    max-width: 60em;
+    flex: 1;
+    border-radius: var(--b-radius) 0 0 var(--b-radius);
+    background: var(--green);
+    padding: 2em;
+}
+
+.heading-container > h1 {
+    font-size: 4rem;
+    color: var(--secondary);
+    margin: 0;
+    line-height: 1.4em;
+    border-right: var(--accent) solid 4px;
+    border-top: var(--accent) solid 4px;
+    padding: .25em;
+}
+
+.subheading-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: .5em;
+    border-left: var(--accent) solid 4px;
+    border-bottom: var(--accent) solid 4px;
+    border-radius: 0 0 0 var(--b-radius);
+}
+
+.subheading-container > p {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--cream);
+    width: 45ch;
+    height: 100%;
+    margin: 0;
+    padding: .6em;
+}
+
+.btn-cta {
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--cream);
+    max-width: fit-content;
+    padding: .9em .6em .9em .6em;
+    border: var(--secondary) solid 2px;
+    border-radius: 6px;
+    background: var(--accent);
+    margin-left: 1em;
+    margin-bottom: 1em;
+    cursor: pointer;
+
+}
+
+.hero-content > img {
+    width: 38em;
+    border-radius: 0 var(--b-radius) var(--b-radius) 0;
+
+}
