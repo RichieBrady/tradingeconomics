@@ -57,9 +57,9 @@
             <button id="getData" class="btn-get-data">Get Data</button>
         </div>
         <div class="chart">
-            <div class="switch-button">
-                <input class="switch-button-checkbox" type="checkbox"></input>
-                <label class="switch-button-label" for=""><span class="switch-button-label-span">Chart</span></label>
+            <div id="switchButton" class="switch-button">
+                <input id="chartOrTableCheck" class="switch-button-checkbox" type="checkbox">
+                <label class="switch-button-label" for=""><span id="switchLabel" class="switch-button-label-span checked">Chart</span></label>
             </div>
 
             <h2 class="chart-heading">Chart or Table Here</h2>
@@ -69,7 +69,32 @@
 </section>
 </body>
 <script>
+
+    const country = document.getElementById('country')
+    const category = document.getElementById('category')
+    const categoryGroup = document.getElementById('categoryGroup')
+    const getLists = document.getElementById('getLists')
     const getData = document.getElementById('getData')
+    const chartOrTableCheck = document.getElementById('chartOrTableCheck')
+    const switchButton = document.getElementById('switchButton')
+    const switchLabel = document.getElementById('switchLabel')
+
+    country.addEventListener('change', (event) => {
+        console.log(event.target)
+    })
+
+    category.addEventListener('change', (event) => {
+        console.log(event.target)
+    })
+
+    categoryGroup.addEventListener('change', (event) => {
+        console.log(event.target)
+    })
+
+    getLists.addEventListener('change', (event) => {
+        console.log(event.target)
+    })
+
     getData.addEventListener('click', (event) => {
         console.log(event.target)
         fetch("{% url 'get_data' %}")
@@ -79,6 +104,13 @@
             }).then(data => {
             console.log(data)
         })
+    })
+
+    chartOrTableCheck.addEventListener('change', (event) => {
+        console.log(event.target.checked)
+        const isChecked = event.target.checked
+        isChecked ? switchButton.classList.add('checked') : switchButton.classList.remove('checked')
+        isChecked ? switchLabel.classList.remove('checked') : switchLabel.classList.add('checked')
     })
 </script>
 </html>

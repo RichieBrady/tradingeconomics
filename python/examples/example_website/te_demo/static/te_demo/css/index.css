@@ -221,8 +221,8 @@ body {
 }
 
 .switch-button {
-    background: var(--green);
-    border-radius: 6px;
+    background: var(--cream);
+    border-radius: .5em;
     overflow: hidden;
     width: 142px;
     text-align: center;
@@ -247,6 +247,11 @@ body {
     justify-content: center;
     z-index: 3;
     pointer-events: none;
+    color: var(--secondary);
+}
+
+.switch-button.checked:before {
+    color: var(--cream);
 }
 
 .switch-button-checkbox {
@@ -276,7 +281,7 @@ body {
 
 .switch-button-checkbox + .switch-button-label:before {
     content: "";
-    background: var(--cream);
+    background: var(--green);
     height: 100%;
     width: 100%;
     position: absolute;
@@ -289,7 +294,11 @@ body {
 
 .switch-button-checkbox + .switch-button-label .switch-button-label-span {
     position: relative;
+    color: var(--secondary);
 }
 
+.switch-button-checkbox + .switch-button-label .switch-button-label-span.checked {
+    color: var(--cream);
+}
 
 
