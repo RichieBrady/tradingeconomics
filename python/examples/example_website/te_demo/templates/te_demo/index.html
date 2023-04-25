@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="{% static 'te_demo/css/index.css' %}">
 </head>
 <body>
+
+<nav class="navbar">
+    <div class="nav-content">
+        <img class="logo" src="{% static 'te_demo/img/logo.svg' %}" alt="example logo">
+        <div class="nav-items">
+            <a href="#" class="nav-item">Home</a>
+            <a href="#" class="nav-item">About</a>
+            <a href="#" class="nav-item">Trading Economics</a>
+        </div>
+    </div>
+</nav>
+
 <section class="hero">
     <div class="hero-content">
         <div class="heading-container">
@@ -18,8 +30,12 @@
             </div>
         </div>
 
-         <img src="{% static 'te_demo/img/hero_illustration.png' %}" alt="stock trader illustration">
+        <img src="{% static 'te_demo/img/hero_illustration.png' %}" alt="stock trader illustration">
     </div>
+</section>
+
+<section class="charts">
+
 </section>
 </body>
 </html>

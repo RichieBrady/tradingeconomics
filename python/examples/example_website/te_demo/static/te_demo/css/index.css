@@ -33,6 +33,53 @@ body {
     margin: 0;
 }
 
+.navbar {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2em;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.nav-content {
+    display: flex;
+    flex-direction: row;
+    background: var(--green);
+    border-radius: var(--b-radius);
+    width: 100%;
+    max-width: 100em;
+}
+
+.logo {
+    width: 46px;
+    margin-left: 2em;
+}
+
+.nav-items {
+    display: flex;
+    flex-direction: row;
+    gap: 1em;
+
+    width: fit-content;
+    padding: 1em;
+    margin-left: auto;
+    margin-right: 2em;
+}
+
+.nav-items > .nav-item {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--secondary);
+}
+
+.nav-item:hover {
+    color: var(--cream);
+    cursor: pointer;
+}
+
 .hero {
     min-height: 100vh;
     padding: 0;
@@ -109,5 +156,10 @@ body {
 .hero-content > img {
     width: 38em;
     border-radius: 0 var(--b-radius) var(--b-radius) 0;
+}
 
+.charts {
+    min-height: 100vh;
+    padding: 0;
+    display: flex;
 }
