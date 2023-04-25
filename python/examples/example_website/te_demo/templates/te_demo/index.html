@@ -35,7 +35,50 @@
 </section>
 
 <section class="charts">
+    <div class="charts-container">
+        <div class="data-selectors">
+            <label for="country">
+                Country:
+                <input id="country" type="text">
+            </label>
+            <label for="category">
+                Category:
+                <input id="category" type="text">
+            </label>
+            <label for="categoryGroup">
+                Category Group:
+                <input id="categoryGroup" type="text">
+            </label>
+            <label for="getLists">
+                List Available:
+                <input id="getLists" type="checkbox">
+            </label>
 
+            <button id="getData" class="btn-get-data">Get Data</button>
+        </div>
+        <div class="chart">
+            <div class="switch-button">
+                <input class="switch-button-checkbox" type="checkbox"></input>
+                <label class="switch-button-label" for=""><span class="switch-button-label-span">Chart</span></label>
+            </div>
+
+            <h2 class="chart-heading">Chart or Table Here</h2>
+        </div>
+
+    </div>
 </section>
 </body>
+<script>
+    const getData = document.getElementById('getData')
+    getData.addEventListener('click', (event) => {
+        console.log(event.target)
+        fetch("{% url 'get_data' %}")
+            .then(res => {
+                console.log(res)
+                return res
+            }).then(data => {
+            console.log(data)
+        })
+    })
+</script>
 </html>
