@@ -42,6 +42,7 @@ body {
     top: 0;
     left: 0;
     width: 100%;
+    z-index: 10000;
 }
 
 .nav-content {
@@ -160,9 +161,9 @@ body {
 
 .charts {
     min-height: 100vh;
-    padding: 0;
     display: flex;
     flex: 1;
+    padding: 10em 1em 1em 1em;
 }
 
 .charts-container {
@@ -301,4 +302,29 @@ body {
     color: var(--cream);
 }
 
+.table-container {
+    width: 100%;
+    padding: 1em;
+}
 
+.example-table {
+    display: none;
+    width: 100%;
+}
+
+.example-table.show {
+    display: block;
+}
+
+.tab-group {
+    display: flex;
+    padding: 0;
+    margin: 0;
+}
+
+.tab-group > button.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+    font-weight: bold;
+}
