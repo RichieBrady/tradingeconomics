@@ -1,4 +1,5 @@
 {% load static %}
+{% load plotly_dash %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
     <link rel="stylesheet" href="{% static 'te_demo/css/index.css' %}">
+    {% plotly_header %}
 </head>
 <body>
 
@@ -47,13 +49,12 @@
                 Country:
                 <input id="country" type="text">
             </label>
-            <label for="category">
-                Category:
-                <input id="category" type="text">
-            </label>
-            <label for="categoryGroup">
-                Category Group:
-                <input id="categoryGroup" type="text">
+            <label for="dropdown">
+                Type:
+                <select id="dropdown" name="dropdown">
+                    <option value="import">Import</option>
+                    <option value="export">Export</option>
+                </select>
             </label>
             <button id="clearInputs">Clear</button>
             <button id="getData" class="btn-get-data">Get Data</button>
@@ -68,12 +69,10 @@
             <div class="table-container">
                 <div class="tab-group" id="tabGroup">
                     <button class="tab-btn active" id="countryTab">Countries</button>
-                    <button class="tab-btn " id="categoryTab">Categories</button>
                     <button class="tab-btn " id="dataTab">Data</button>
                 </div>
                 <div class="tables">
                     <div class="example-table show" id="country-table"></div>
-                    <div class="example-table" id="category-table"></div>
                     <div class="example-table" id="data-table"></div>
                 </div>
 
@@ -86,39 +85,34 @@
                 </div>
             </div>
         </div>
+
+
     </div>
 </section>
+
+<section class="charts">
+    <div style="height: 100vh; width: 100vw">
+        {% plotly_direct name="LineChart" %}
+    </div>
+</section>
+
 </body>
+{% plotly_footer %}
 <script>
     const country = document.getElementById('country')
-    const category = document.getElementById('category')
-    const categoryGroup = document.getElementById('categoryGroup')
+    const typeSelector = document.getElementById('dropdown')
     const clearInputs = document.getElementById('clearInputs')
     const getData = document.getElementById('getData')
     const chartOrTableCheck = document.getElementById('chartOrTableCheck')
     const switchButton = document.getElementById('switchButton')
     const switchLabel = document.getElementById('switchLabel')
     const filterField = document.getElementById('filterField')
-    const div = document.querySelector('div')
 
     let table
-    let categoryTable
     let countryTable
-
-    category.addEventListener('input', (event) => {
-        event.target.value ? categoryGroup.setAttribute('disabled', '') : categoryGroup.removeAttribute('disabled')
-    })
-
-    categoryGroup.addEventListener('input', (event) => {
-        event.target.value ? category.setAttribute('disabled', '') : category.removeAttribute('disabled')
-    })
 
     clearInputs.addEventListener('click', () => {
         country.value = ''
-        category.value = ''
-        category.removeAttribute('disabled')
-        categoryGroup.value = ''
-        categoryGroup.removeAttribute('disabled')
     })
 
     const setSwitch = () => {
@@ -134,17 +128,23 @@
     }
 
     const fetchData = () => {
-        const url = `{% url 'get_data' %}?country=${country.value}&category=${category.value}&category_group=${categoryGroup.value}`
+        const url = `{% url 'get_data' %}?country=${country.value}&type_selector=${typeSelector.value}`
+
         fetch(url, {method: 'GET'})
             .then(
-                res => res.json()
+                res => {
+                    console.log(res.ok)
+                    if (!res.ok) {
+                        throw new Error('Data not found');
+                    }
+                    return res.json()
+                }
             )
             .then(data => {
                 const parsedData = JSON.parse(data['table_data'])
-
                 table = new Tabulator("#data-table", {
                     layout: "fitColumns",
-                    height: "500px",
+                    height: "650px",
                     resizableColumnFit: true,
                     pagination: "local",
                     paginationSize: 100,
@@ -153,6 +153,18 @@
                     data: parsedData,
                     autoColumns: true,
                 });
+                const refresh = document.getElementById('refresh')
+                refresh.click()
+            })
+            .catch(error => {
+                // Handle any errors that occurred during the request
+                console.log(error)
+                console.log(error.response)
+                if (error.response.status === 404) {
+                    console.log('404 error: Resource not found');
+                } else {
+                    console.log('Error:', error);
+                }
             })
     }
 
@@ -164,33 +176,13 @@
             .then(data => {
                 countryTable = new Tabulator("#country-table", {
                     layout: "fitColumns",
-                    height: "500px",
+                    height: "650px",
                     resizableColumnFit: true,
                     pagination: "local",
                     paginationSize: 100,
                     paginationSizeSelector: [100, 250, 500],
                     paginationCounter: "rows",
                     data: data['country_data'],
-                    autoColumns: true,
-                });
-            })
-    }
-
-    const fetchCategories = () => {
-        fetch("{% url 'get_categories' %}")
-            .then(
-                res => res.json()
-            )
-            .then(data => {
-                categoryTable = new Tabulator("#category-table", {
-                    layout: "fitColumns",
-                    height: "500px",
-
-                    pagination: "local",
-                    paginationSize: 100,
-                    paginationSizeSelector: [100, 250, 500],
-                    paginationCounter: "rows",
-                    data: data['category_data'],
                     autoColumns: true,
                 });
             })
@@ -227,16 +219,6 @@
     document.querySelector('.tables').addEventListener('click', (event) => {
         if (event.target.getAttribute('tabulator-field') === "Country") {
             country.value = event.target.innerText
-        } else if (event.target.getAttribute('tabulator-field') === "Category") {
-            category.removeAttribute('disabled')
-            category.value = event.target.innerText
-            categoryGroup.value = ''
-            categoryGroup.setAttribute('disabled', '')
-        } else if (event.target.getAttribute('tabulator-field') === "CategoryGroup") {
-            categoryGroup.removeAttribute('disabled')
-            categoryGroup.value = event.target.innerText
-            category.value = ''
-            category.setAttribute('disabled', '')
         }
     })
 
@@ -357,7 +339,6 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         fetchCountries()
-        fetchCategories()
     });
 </script>
 </html>
