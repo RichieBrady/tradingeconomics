@@ -1,0 +1,344 @@
+{% load static %}
+{% load plotly_dash %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example Website</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'te_demo/img/logo.svg' %}">
+    <link href="https://unpkg.com/tabulator-tables@5.4.4/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.20/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="{% static 'te_demo/css/index.css' %}">
+    {% plotly_header %}
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-content">
+        <img class="logo" src="{% static 'te_demo/img/logo.svg' %}" alt="example logo">
+        <div class="nav-items">
+            <a href="#" class="nav-item">Home</a>
+            <a href="#" class="nav-item">About</a>
+            <a href="#" class="nav-item">Trading Economics</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="heading-container">
+            <h1>Revolutionize Your Investment Strategy with Data-Driven Insights</h1>
+            <div class="subheading-container">
+                <p>Compare and Analyze Financial Data Across Markets to Make Confident Investment Decisions</p>
+                <button class="btn-cta">Call To Action</button>
+            </div>
+        </div>
+
+        <img src="{% static 'te_demo/img/hero_illustration.png' %}" alt="stock trader illustration">
+    </div>
+</section>
+
+<section class="charts">
+    <div class="charts-container">
+        <div class="data-selectors">
+            <label for="country">
+                Country:
+                <input id="country" type="text">
+            </label>
+            <label for="dropdown">
+                Type:
+                <select id="dropdown" name="dropdown">
+                    <option value="import">Import</option>
+                    <option value="export">Export</option>
+                </select>
+            </label>
+            <button id="clearInputs">Clear</button>
+            <button id="getData" class="btn-get-data">Get Data</button>
+        </div>
+        <div class="chart">
+            <div id="switchButton" class="switch-button">
+                <input id="chartOrTableCheck" class="switch-button-checkbox" type="checkbox">
+                <label class="switch-button-label" for=""><span id="switchLabel"
+                                                                class="switch-button-label-span checked">Chart</span></label>
+            </div>
+
+            <div class="table-container">
+                <div class="tab-group" id="tabGroup">
+                    <button class="tab-btn active" id="countryTab">Countries</button>
+                    <button class="tab-btn " id="dataTab">Data</button>
+                </div>
+                <div class="tables">
+                    <div class="example-table show" id="country-table"></div>
+                    <div class="example-table" id="data-table"></div>
+                </div>
+
+                <div style="display: flex; flex-direction: row; flex: 1; justify-content: end; align-items: center; padding-top: .5em">
+                    <button id="download-csv">Download CSV</button>
+                    <button id="download-json">Download JSON</button>
+                    <button id="download-xlsx">Download XLSX</button>
+                    <button id="download-pdf">Download PDF</button>
+                    <button id="download-html">Download HTML</button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</section>
+
+<section class="charts">
+    <div style="height: 100vh; width: 100vw">
+        {% plotly_direct name="LineChart" %}
+    </div>
+</section>
+
+</body>
+{% plotly_footer %}
+<script>
+    const country = document.getElementById('country')
+    const typeSelector = document.getElementById('dropdown')
+    const clearInputs = document.getElementById('clearInputs')
+    const getData = document.getElementById('getData')
+    const chartOrTableCheck = document.getElementById('chartOrTableCheck')
+    const switchButton = document.getElementById('switchButton')
+    const switchLabel = document.getElementById('switchLabel')
+    const filterField = document.getElementById('filterField')
+
+    let table
+    let countryTable
+
+    clearInputs.addEventListener('click', () => {
+        country.value = ''
+    })
+
+    const setSwitch = () => {
+        chartOrTableCheck.setAttribute('checked', `${!chartOrTableCheck.checked}`)
+        chartOrTableCheck.dispatchEvent(new Event('change'))
+        chartOrTableCheck.setAttribute('disabled', '')
+    }
+
+    const resetSwitch = () => {
+        chartOrTableCheck.removeAttribute('checked')
+        chartOrTableCheck.dispatchEvent(new Event('change'))
+        chartOrTableCheck.removeAttribute('disabled')
+    }
+
+    const fetchData = () => {
+        const url = `{% url 'get_data' %}?country=${country.value}&type_selector=${typeSelector.value}`
+
+        fetch(url, {method: 'GET'})
+            .then(
+                res => {
+                    console.log(res.ok)
+                    if (!res.ok) {
+                        throw new Error('Data not found');
+                    }
+                    return res.json()
+                }
+            )
+            .then(data => {
+                const parsedData = JSON.parse(data['table_data'])
+                table = new Tabulator("#data-table", {
+                    layout: "fitColumns",
+                    height: "650px",
+                    resizableColumnFit: true,
+                    pagination: "local",
+                    paginationSize: 100,
+                    paginationSizeSelector: [100, 250, 500],
+                    paginationCounter: "rows",
+                    data: parsedData,
+                    autoColumns: true,
+                });
+                const refresh = document.getElementById('refresh')
+                refresh.click()
+            })
+            .catch(error => {
+                // Handle any errors that occurred during the request
+                console.log(error)
+                console.log(error.response)
+                if (error.response.status === 404) {
+                    console.log('404 error: Resource not found');
+                } else {
+                    console.log('Error:', error);
+                }
+            })
+    }
+
+    const fetchCountries = () => {
+        fetch("{% url 'get_countries' %}")
+            .then(
+                res => res.json()
+            )
+            .then(data => {
+                countryTable = new Tabulator("#country-table", {
+                    layout: "fitColumns",
+                    height: "650px",
+                    resizableColumnFit: true,
+                    pagination: "local",
+                    paginationSize: 100,
+                    paginationSizeSelector: [100, 250, 500],
+                    paginationCounter: "rows",
+                    data: data['country_data'],
+                    autoColumns: true,
+                });
+            })
+    }
+
+    const setActiveTab = (setActive, classSelector, activeClass) => {
+        let i;
+        let x = document.getElementsByClassName(classSelector);
+        for (i = 0; i < x.length; i++) {
+            x[i].classList.remove(activeClass)
+        }
+        document.getElementById(setActive).classList.add(activeClass)
+    }
+
+    document.querySelector("#tabGroup").addEventListener("click", (event) => {
+        let tableToShow = ""
+        let activeBtn = ""
+        if (event.target.getAttribute("id") === "countryTab") {
+            tableToShow = "country-table"
+            activeBtn = "countryTab"
+        } else if (event.target.getAttribute("id") === "categoryTab") {
+            tableToShow = "category-table"
+            activeBtn = "categoryTab"
+        } else if (event.target.getAttribute("id") === "dataTab") {
+            tableToShow = "data-table"
+            activeBtn = "dataTab"
+        }
+        if (tableToShow !== "") {
+            setActiveTab(tableToShow, "example-table", "show")
+            setActiveTab(activeBtn, "tab-btn", "active")
+        }
+    })
+
+    document.querySelector('.tables').addEventListener('click', (event) => {
+        if (event.target.getAttribute('tabulator-field') === "Country") {
+            country.value = event.target.innerText
+        }
+    })
+
+    getData.addEventListener('click', (event) => {
+        fetchData()
+    })
+
+    chartOrTableCheck.addEventListener('change', (event) => {
+        const isChecked = event.target.checked
+        isChecked ? switchButton.classList.add('checked') : switchButton.classList.remove('checked')
+        isChecked ? switchLabel.classList.remove('checked') : switchLabel.classList.add('checked')
+    })
+
+    let minMaxFilterEditor = function (cell, onRendered, success, cancel, editorParams) {
+
+        let end;
+
+        let container = document.createElement("span");
+
+        //create and style inputs
+        let start = document.createElement("input");
+        start.setAttribute("type", "number");
+        start.setAttribute("placeholder", "Min");
+        start.setAttribute("min", 0);
+        start.setAttribute("max", 100);
+        start.style.padding = "4px";
+        start.style.width = "50%";
+        start.style.boxSizing = "border-box";
+
+        start.value = cell.getValue();
+
+        function buildValues() {
+            success({
+                start: start.value,
+                end: end.value,
+            });
+        }
+
+        function keypress(e) {
+            if (e.keyCode === 13) {
+                buildValues();
+            }
+
+            if (e.keyCode === 27) {
+                cancel();
+            }
+        }
+
+        end = start.cloneNode();
+        end.setAttribute("placeholder", "Max");
+
+        start.addEventListener("change", buildValues);
+        start.addEventListener("blur", buildValues);
+        start.addEventListener("keydown", keypress);
+
+        end.addEventListener("change", buildValues);
+        end.addEventListener("blur", buildValues);
+        end.addEventListener("keydown", keypress);
+
+
+        container.appendChild(start);
+        container.appendChild(end);
+
+        return container;
+    }
+
+    //custom max min filter function
+    function minMaxFilterFunction(headerValue, rowValue, rowData, filterParams) {
+        //headerValue - the value of the header filter element
+        //rowValue - the value of the column in this row
+        //rowData - the data for the row being filtered
+        //filterParams - params object passed to the headerFilterFuncParams property
+
+        if (rowValue) {
+            if (headerValue.start !== "") {
+                if (headerValue.end !== "") {
+                    return rowValue >= headerValue.start && rowValue <= headerValue.end;
+                } else {
+                    return rowValue >= headerValue.start;
+                }
+            } else {
+                if (headerValue.end !== "") {
+                    return rowValue <= headerValue.end;
+                }
+            }
+        }
+
+        return true; //must return a boolean, true if it passes the filter.
+    }
+
+    //trigger download of data.csv file
+    document.getElementById("download-csv").addEventListener("click", function () {
+        table.download("csv", "data.csv");
+    });
+
+    //trigger download of data.json file
+    document.getElementById("download-json").addEventListener("click", function () {
+        table.download("json", "data.json");
+    });
+
+    //trigger download of data.xlsx file
+    document.getElementById("download-xlsx").addEventListener("click", function () {
+        table.download("xlsx", "data.xlsx", {sheetName: "My Data"});
+    });
+
+    //trigger download of data.pdf file
+    document.getElementById("download-pdf").addEventListener("click", function () {
+        table.download("pdf", "data.pdf", {
+            orientation: "portrait", //set page orientation to portrait
+            title: "Example Report", //add title to report
+        });
+    });
+
+    //trigger download of data.html file
+    document.getElementById("download-html").addEventListener("click", function () {
+        table.download("html", "data.html", {style: true});
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchCountries()
+    });
+</script>
+</html>
